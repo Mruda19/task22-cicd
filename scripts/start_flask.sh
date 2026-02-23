@@ -1,10 +1,21 @@
 #!/bin/bash
-set -e
+# scripts/start_flask.sh
 
-cd /home/ec2-user/my-flask-app || exit 1
+REPOSITORY_URI=989615686095.dkr.ecr.ap-southeast-1.amazonaws.com/hello-repo
+IMAGE_TAG=latest
+CONTAINER_NAME=my-flask-app
+PORT=5000
 
-# Kill any existing Flask process
-pkill -f "python3 app.py" || true
+echo "Stopping any existing container..."
+docker rm -f $CONTAINER_NAME 2>/dev/null || true
 
-# Start Flask in background and log output
-nohup python3 app.py > app.log 2>&1 &
+echo "Logging into ECR..."
+aws ecr get-login-password --region ap-southeast-1 | docker login --username AWS --password-stdin $REPOSITORY_URI
+
+echo "Pulling the latest image..."
+docker pull $REPOSITORY_URI:$IMAGE_TAG
+
+echo "Running container..."
+docker run -d --name $CONTAINER_NAME -p $PORT:5000 $REPOSITORY_URI:$IMAGE_TAG
+
+echo "Container started successfully!"
