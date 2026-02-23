@@ -5,36 +5,41 @@ env:
     AWS_DEFAULT_REGION: ap-southeast-1
     ACCOUNT_ID: 989615686095
     REPOSITORY_NAME: hello-repo
+    REPOSITORY_URI: 989615686095.dkr.ecr.ap-southeast-1.amazonaws.com/hello-repo
 
 phases:
   install:
     runtime-versions:
       python: 3.10
     commands:
-      - echo Installing dependencies...
+      - echo "Installing Python dependencies..."
+      - python3 -m pip install --upgrade pip
       - pip install -r requirements.txt
       - pip install pytest
 
   pre_build:
     commands:
-      - echo Logging into Amazon ECR...
-      - REPOSITORY_URI=$ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$REPOSITORY_NAME
-      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
-      - echo Running tests...
+      - echo "Logging into Amazon ECR..."
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $REPOSITORY_URI
+      - echo "Running tests..."
       - pytest || echo "No tests found, skipping..."
 
   build:
     commands:
-      - echo Building Docker image...
+      - echo "Building Docker image..."
       - docker build -t $REPOSITORY_NAME .
       - docker tag $REPOSITORY_NAME:latest $REPOSITORY_URI:latest
 
   post_build:
     commands:
-      - echo Pushing image to Amazon ECR...
+      - echo "Pushing Docker image to Amazon ECR..."
       - docker push $REPOSITORY_URI:latest
+      - echo "Build and push complete."
 
 artifacts:
   files:
     - appspec.yml
     - scripts/**/*
+    - app.py
+    - requirements.txt
+    - Dockerfile
