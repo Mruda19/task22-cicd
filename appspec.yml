@@ -6,12 +6,17 @@ files:
     destination: /home/ec2-user/my-flask-app
 
 hooks:
-  BeforeInstall:
-    - location: scripts/before_install.sh
+  ApplicationStop:
+    - location: scripts/stop_flask.sh
+      timeout: 60
+      runas: ec2-user
+
+  AfterInstall:
+    - location: scripts/install_dependencies.sh
       timeout: 300
       runas: ec2-user
 
   ApplicationStart:
-    - location: scripts/start.sh
+    - location: scripts/start_flask.sh
       timeout: 60
       runas: ec2-user
