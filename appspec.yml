@@ -3,7 +3,7 @@ os: linux
 
 files:
   - source: /
-    destination: /home/ec2-user/app
+    destination: /home/ec2-user/my-flask-app
 
 hooks:
   BeforeInstall:
@@ -13,5 +13,5 @@ hooks:
 
   ApplicationStart:
     - location: scripts/start.sh
-      timeout: 300
+      timeout: 60
       runas: ec2-user
