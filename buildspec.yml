@@ -2,7 +2,7 @@ version: 0.2
 
 env:
   variables:
-    REGION: ap-south-1
+    REGION: ap-southeast-1
     REPOSITORY_NAME: hello-repo
 
 phases:
@@ -15,11 +15,13 @@ phases:
 
   build:
     commands:
+      - echo Build started...
       - docker build -t $REPOSITORY_NAME .
       - docker tag $REPOSITORY_NAME:latest $REPOSITORY_URI:latest
 
   post_build:
     commands:
+      - echo Pushing image...
       - docker push $REPOSITORY_URI:latest
 
 artifacts:
